@@ -57,20 +57,30 @@ def _build_prompt(batch: list[dict], context: str, preference_prompt: str, confi
         f"Item {i + 1}: {json.dumps({k: v for k, v in item.items() if not str(k).startswith('_')}, ensure_ascii=False)}"
         for i, item in enumerate(batch)
     )
+    priority_text = "\n".join(f"- {p}" for p in priorities)
 
-    return f"""Analyse these {len(batch)} items and return a JSON object.
+    return f"""你在为一位中文自媒体作者筛选选题素材。分析下面 {len(batch)} 条内容，返回 JSON。
 
 # Items
+hours_ago = 发布距今多少小时；heat = 平台热度值；comments = 评论数；rank = 榜单排名（越小越热）
 {items_text}
 
-# User Context
-{context[:800] if context else "Not provided"}
+# 作者情况
+{context[:800] if context else "未提供"}
 
-# User Priorities
-{chr(10).join(f"- {p}" for p in priorities)}
+# 作者的优先级
+{priority_text}
 
 {preference_prompt}
 
-# Instructions
-Return: {{"analyses": [{{"score": <0-100>, "summary": "<2 sentences>", "notes": "<why this matches or doesn't>"}} for each item in order]}}
-Be concise. Score 90+=excellent match, 70-89=good, 50-69=ok, <50=weak."""
+# 评分规则（严格执行，不要客气）
+1. 只留中文内容。纯英文、纯海外且与国内无关的 → score ≤ 20。
+2. 海外内容只有在明确影响国内（政策监管、产业链、大厂动作、资本、普通人生活）时才可到 70+。
+3. 时效：hours_ago ≤ 24 → 可给 85+；≤ 48 → 最高 80；48–72 → 最高 45；> 72 → ≤ 35。
+4. 热度：comments ≥ 1000、或 heat 很高、或 rank ≤ 10，才可能是高分。评论多 = 大众真的在讨论。
+5. 只有小圈子知道的不算热点：行业内部消息、极客向技术细节、小众产品发布 → ≤ 50。
+6. 素材价值：能撑起一条短视频/公众号选题（有冲突、有情绪、有观点可讲）加分。
+
+# 输出格式
+Return: {{"analyses": [{{"score": <0-100>, "summary": "<中文，40 字以内讲清这条是什么>", "notes": "<中文，30 字以内说为什么>"}} for each item in order]}}
+输出务必精简，不要解释，不要 markdown。"""

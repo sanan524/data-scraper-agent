@@ -10,7 +10,7 @@ from notion_client.errors import APIResponseError
 
 _client = None
 
-# 建库时定下的 8 个属性名，代码里靠它们定位
+# 建库时定下的属性名，代码里靠它们定位
 P_NAME = "Name"
 P_URL = "URL"
 P_SOURCE = "Source"
@@ -19,6 +19,8 @@ P_STATUS = "Status"
 P_SCORE = "AI Score"
 P_SUMMARY = "Summary"
 P_NOTES = "Notes"
+P_HEAT = "Heat"
+P_COMMENTS = "Comments"
 
 REQUIRED_PROPERTIES = {
     P_NAME: "title",
@@ -29,6 +31,8 @@ REQUIRED_PROPERTIES = {
     P_SCORE: "number",
     P_SUMMARY: "rich_text",
     P_NOTES: "rich_text",
+    P_HEAT: "number",
+    P_COMMENTS: "number",
 }
 
 
@@ -81,6 +85,10 @@ def push_item(db_id: str, item: dict) -> bool:
 
     if item.get("ai_score") is not None:
         props[P_SCORE] = {"number": int(item["ai_score"])}
+    if item.get("heat") is not None:
+        props[P_HEAT] = {"number": int(item["heat"])}
+    if item.get("comments") is not None:
+        props[P_COMMENTS] = {"number": int(item["comments"])}
     if item.get("ai_summary"):
         props[P_SUMMARY] = {"rich_text": [{"text": {"content": str(item["ai_summary"])[:2000]}}]}
     if item.get("ai_notes"):

@@ -1,32 +1,60 @@
 # 所有面向用户的开关都放这里，代码里不写死任何关键词。
-# 改完直接 push，下一轮 Actions 就生效。
+# 改完 push，下一轮 Actions 就生效；不写代码也能调。
 
 # ---------- 抓取源 ----------
 sources:
-  hackernews:
+  # 国内实时热榜（无需 key）
+  baidu_hot:
     enabled: true
-    queries:
-      - "llm"
-      - "ai agent"
-      - "open source"
+    limit: 30
+  toutiao_hot:
+    enabled: true
+    limit: 30
+
+  # B 站排行榜：唯一带真实评论数的源
+  bilibili_rank:
+    enabled: true
+    limit: 30
+
+  # 中文科技/生活媒体，带发布时间，可做 48 小时过滤
+  rss:
+    enabled: true
+    feeds:
+      - name: "IT之家"
+        url: "https://www.ithome.com/rss/"
+        limit: 20
+      - name: "爱范儿"
+        url: "https://www.ifanr.com/feed"
+        limit: 20
+      - name: "少数派"
+        url: "https://sspai.com/feed"
+        limit: 10
+
+  # 英文源，默认关掉（用户只要中文内容）
+  hackernews:
+    enabled: false
+    queries: ["llm", "ai agent"]
     hits_per_page: 30
 
 # ---------- 规则预过滤（在 AI 之前跑，省额度）----------
 filters:
   required_keywords: []        # 命中任意一个才留下；留空 = 不过滤
   blocked_keywords:            # 命中任意一个直接丢弃
+    - "招聘"
+    - "招人"
     - "hiring"
-    - "who is hiring"
-  max_items: 20                # 单轮最多处理多少条（防止额度炸掉）
+  max_age_hours: 48            # 超过这个时效的直接丢（热榜类没有发布时间，视为实时）
+  max_items: 20                # 单轮最多送多少条给 AI
 
 # ---------- AI 打分依据 ----------
 priorities:
-  - "AI / LLM 相关的新工具、新框架、新论文"
-  - "开源、能直接接进自己工作流的项目"
+  - "中文内容的国内热点：48 小时以内、大众已经在广泛讨论的话题"
+  - "对自媒体选题有用：能延伸出观点、有讨论度、有素材价值"
+  - "海外内容只有在明确影响国内（政策、产业链、大厂、资本、普通人生活）时才算"
 
 # ---------- 存储 ----------
 storage:
-  provider: "notion"           # notion（本仓库只实现这一种）
+  provider: "notion"
 
 # ---------- 反馈学习 ----------
 feedback:
@@ -37,6 +65,6 @@ feedback:
 ai:
   enabled: true
   model: "gemini-3.6-flash"    # 2.x 系列已对新 key 下线；3.7/3.8 目前常 503
-  min_score: 40                # 低于这个分数直接不入库（<50 视为弱相关，见 SKILL.md）
-  rate_limit_seconds: 7        # 两次 Gemini 调用之间的最小间隔
+  min_score: 45                # 低于这个分数不入库（判定标准偏严，宁可漏不可杂）
+  rate_limit_seconds: 15       # 两次 Gemini 调用之间的最小间隔（免费层 RPM 很紧，别调太小）
   batch_size: 5                # 每次调用喂几条

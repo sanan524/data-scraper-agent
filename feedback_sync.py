@@ -8,6 +8,12 @@ import os
 import sys
 from pathlib import Path
 
+for _s in (sys.stdout, sys.stderr):
+    try:  # Windows 控制台默认 GBK，中文/符号会崩，强制 UTF-8
+        _s.reconfigure(encoding="utf-8", errors="replace")
+    except Exception:
+        pass
+
 import yaml
 from dotenv import load_dotenv
 
