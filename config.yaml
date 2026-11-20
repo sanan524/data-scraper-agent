@@ -1,0 +1,42 @@
+# 所有面向用户的开关都放这里，代码里不写死任何关键词。
+# 改完直接 push，下一轮 Actions 就生效。
+
+# ---------- 抓取源 ----------
+sources:
+  hackernews:
+    enabled: true
+    queries:
+      - "llm"
+      - "ai agent"
+      - "open source"
+    hits_per_page: 30
+
+# ---------- 规则预过滤（在 AI 之前跑，省额度）----------
+filters:
+  required_keywords: []        # 命中任意一个才留下；留空 = 不过滤
+  blocked_keywords:            # 命中任意一个直接丢弃
+    - "hiring"
+    - "who is hiring"
+  max_items: 20                # 单轮最多处理多少条（防止额度炸掉）
+
+# ---------- AI 打分依据 ----------
+priorities:
+  - "AI / LLM 相关的新工具、新框架、新论文"
+  - "开源、能直接接进自己工作流的项目"
+
+# ---------- 存储 ----------
+storage:
+  provider: "notion"           # notion（本仓库只实现这一种）
+
+# ---------- 反馈学习 ----------
+feedback:
+  positive_statuses: ["Saved", "Applied", "Interested"]
+  negative_statuses: ["Skip", "Rejected", "Not relevant"]
+
+# ---------- AI 参数 ----------
+ai:
+  enabled: true
+  model: "gemini-2.5-flash"
+  min_score: 40                # 低于这个分数直接不入库（<50 视为弱相关，见 SKILL.md）
+  rate_limit_seconds: 7        # 两次 Gemini 调用之间的最小间隔
+  batch_size: 5                # 每次调用喂几条
