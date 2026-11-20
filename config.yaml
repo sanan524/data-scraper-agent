@@ -36,7 +36,7 @@ feedback:
 # ---------- AI 参数 ----------
 ai:
   enabled: true
-  model: "gemini-2.5-flash"
+  model: "gemini-3.6-flash"    # 2.x 系列已对新 key 下线；3.7/3.8 目前常 503
   min_score: 40                # 低于这个分数直接不入库（<50 视为弱相关，见 SKILL.md）
   rate_limit_seconds: 7        # 两次 Gemini 调用之间的最小间隔
   batch_size: 5                # 每次调用喂几条

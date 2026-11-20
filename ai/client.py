@@ -5,13 +5,17 @@ import time
 
 import requests
 
-# 从高额度到低额度排列：前一个被打爆就换下一个
+# 从高能力到低额度排列：前一个不可用就换下一个
+# 注意：gemini-2.x 系列对新建的 key 已全部下线（404 "no longer available to new users"）
 MODEL_FALLBACK = [
-    "gemini-2.0-flash-lite",
-    "gemini-2.0-flash",
-    "gemini-2.5-flash",
+    "gemini-3.6-flash",
+    "gemini-3.5-flash-lite",
     "gemini-flash-lite-latest",
+    "gemini-flash-latest",
 ]
+
+# 这些状态码说明"这个模型现在不行"，换下一个；其它状态码直接放弃
+RETRYABLE = (404, 429, 500, 503)
 
 ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
 
@@ -51,10 +55,10 @@ def generate(prompt: str, model: str = "", rate_limit: float = 7.0) -> dict:
             )
             if resp.status_code == 200:
                 return _parse(resp)
-            if resp.status_code in (429, 404):
-                # 429 = 额度打爆；404 = 该模型在当前 key 下不可用
+            if resp.status_code in RETRYABLE:
+                # 404 = 模型下线；429 = 额度打爆；503 = 高峰期
                 print(f"  [AI] {m} -> HTTP {resp.status_code}，降级")
-                time.sleep(1)
+                time.sleep(2)
                 continue
             print(f"  [AI] {m} -> HTTP {resp.status_code}: {resp.text[:200]}")
             return {}
