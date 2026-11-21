@@ -6,6 +6,7 @@
 """
 import os
 import sys
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 for _s in (sys.stdout, sys.stderr):
@@ -195,9 +196,18 @@ def main() -> None:
     else:
         print("[AI] Skipped — GEMINI_API_KEY not set or ai.enabled=false")
 
-    # 7) 入库
+    # 7) 打批次标记：同一轮抓到的所有条目共用一个"批次"标签，
+    #    在 Notion 里按「批次」分组就能看出"这一屏是哪次热榜"
+    _now = datetime.now(timezone(timedelta(hours=8)))
+    batch_label = _now.strftime("%m-%d %H:%M")
+    run_at = _now.isoformat(timespec="seconds")
+    for it in fresh:
+        it["batch"] = batch_label
+        it["run_at"] = run_at
+
+    # 8) 入库
     if "--dry-run" in sys.argv:
-        print(f"[dry-run] 不写入。本来会入库 {len(fresh)} 条：")
+        print(f"[dry-run] 批次 {batch_label}，不写入。本来会入库 {len(fresh)} 条：")
         for item in fresh[:8]:
             score = item.get("ai_score")
             tag = f"[{score}]" if score is not None else "[--]"
@@ -207,7 +217,7 @@ def main() -> None:
         return
 
     added, skipped = sync(db_id, fresh)
-    print(f"Done — {added} new, {skipped} skipped")
+    print(f"Done — 批次 {batch_label}，{added} new, {skipped} skipped")
 
 
 if __name__ == "__main__":

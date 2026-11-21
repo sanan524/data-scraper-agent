@@ -21,6 +21,8 @@ P_SUMMARY = "Summary"
 P_NOTES = "Notes"
 P_HEAT = "Heat"
 P_COMMENTS = "Comments"
+P_BATCH = "批次"
+P_RUN_AT = "抓取时间"
 
 REQUIRED_PROPERTIES = {
     P_NAME: "title",
@@ -33,6 +35,8 @@ REQUIRED_PROPERTIES = {
     P_NOTES: "rich_text",
     P_HEAT: "number",
     P_COMMENTS: "number",
+    P_BATCH: "select",
+    P_RUN_AT: "date",
 }
 
 
@@ -89,6 +93,11 @@ def push_item(db_id: str, item: dict) -> bool:
         props[P_HEAT] = {"number": int(item["heat"])}
     if item.get("comments") is not None:
         props[P_COMMENTS] = {"number": int(item["comments"])}
+    # 这批是哪次抓的：批次用来看"一次热榜的横截面"，抓取时间用来排序/过滤
+    if item.get("batch"):
+        props[P_BATCH] = {"select": {"name": str(item["batch"])}}
+    if item.get("run_at"):
+        props[P_RUN_AT] = {"date": {"start": str(item["run_at"])}}
     if item.get("ai_summary"):
         props[P_SUMMARY] = {"rich_text": [{"text": {"content": str(item["ai_summary"])[:2000]}}]}
     if item.get("ai_notes"):
