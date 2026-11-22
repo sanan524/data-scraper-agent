@@ -57,6 +57,8 @@ storage:
   provider: "notion"
 
 # ---------- 反馈学习 ----------
+# 依赖 Notion 的 Status 列：你把条目标成 Saved 就是正样本，标 Skip 就是负样本，
+# 下一轮打分会把 prompt 往你的口味偏。
 feedback:
   positive_statuses: ["Saved", "Applied", "Interested"]
   negative_statuses: ["Skip", "Rejected", "Not relevant"]

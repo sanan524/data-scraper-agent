@@ -55,7 +55,10 @@ Done — 19 new, 0 skipped
 ## Notion 库属性（必须一字不差）
 
 `Name`(title) · `URL`(url) · `Source`(select) · `Date Found`(date) · `Status`(select)
-· `AI Score`(number) · `Summary`(rich_text) · `Notes`(rich_text) · `Heat`(number) · `Comments`(number)
+· `AI Score`(number) · `Summary`(rich_text) · `Notes`(rich_text) · `Heat`(number) · `Comments`(number) · `批次`(select)
+
+> `批次` 是每轮抓取的时间戳（如 `11-21 09:55`），按它分组就能看出"这一屏是哪次热榜"。
+> `Status` 是反馈学习的入口：标 `Saved` = 正样本，标 `Skip` = 负样本，下一轮打分自动偏向你的口味。
 
 ## GitHub Actions
 

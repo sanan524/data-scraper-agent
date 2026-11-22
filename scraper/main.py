@@ -200,10 +200,8 @@ def main() -> None:
     #    在 Notion 里按「批次」分组就能看出"这一屏是哪次热榜"
     _now = datetime.now(timezone(timedelta(hours=8)))
     batch_label = _now.strftime("%m-%d %H:%M")
-    run_at = _now.isoformat(timespec="seconds")
     for it in fresh:
         it["batch"] = batch_label
-        it["run_at"] = run_at
 
     # 8) 入库
     if "--dry-run" in sys.argv:
