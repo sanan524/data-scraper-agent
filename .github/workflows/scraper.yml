@@ -2,8 +2,9 @@ name: Data Scraper Agent
 
 on:
   schedule:
-    - cron: "0 */3 * * *"   # 每 3 小时一次，想改频率就改这里
-  workflow_dispatch:         # 支持手动触发
+    # GitHub 的 cron 走 UTC：43 2,9 = 02:43 / 09:43 UTC = 北京 10:43 / 17:43
+    - cron: "43 2,9 * * *"
+  workflow_dispatch:
 
 permissions:
   contents: write            # 提交 data/feedback.json 需要
