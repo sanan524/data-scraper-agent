@@ -22,7 +22,6 @@ P_NOTES = "Notes"
 P_HEAT = "Heat"
 P_COMMENTS = "Comments"
 P_BATCH = "批次"
-P_RUN_AT = "抓取时间"
 
 REQUIRED_PROPERTIES = {
     P_NAME: "title",
